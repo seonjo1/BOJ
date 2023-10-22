@@ -1,6 +1,7 @@
 #include <iostream>
 #include <algorithm>
 #include <vector>
+#include <queue>
 using namespace std;
 
 int main()
@@ -10,11 +11,10 @@ int main()
 	cout.tie(0);
 
 	int	N, depart, arrive, M;
-	long long INF = 100000000000000000;
-	long long a_cost = INF;
+	long long INF = 1000000000000000000;
 	cin >> N >> depart >> arrive >> M;
 
-	vector<long long> ans(N);
+	vector<long long> ans(N, INF);
 	vector<long long> earn(N);
 	vector<vector<pair<int, long long>>> v(N, vector<pair<int, long long>>());
 	for (int i = 0; i < M; i++)
@@ -30,8 +30,20 @@ int main()
 		cin >> c;
 		earn[i] = -c;
 	}
-	fill(ans.begin(), ans.end(), INF);
 	ans[depart] = 0 + earn[depart];
+	if (N == 1)
+	{
+		for (int j = 0; j < M; j++)
+		{
+			if (earn[0] + v[0][j].second < 0)
+			{
+				cout << "Gee\n";
+				exit(0);
+			}
+		}
+		cout << -earn[0] << "\n";
+		exit(0);
+	}
 	for (int i = 0; i < N - 1; i++)
 	{
 		for (int j = 0; j < N; j++)
@@ -41,15 +53,15 @@ int main()
 			for (pair<int, long long> t : v[j])
 				if (ans[t.first] > ans[j] + t.second + earn[t.first])
 					ans[t.first] = ans[j] + t.second + earn[t.first];
-			a_cost = min(a_cost, ans[arrive]);
 		}
 	}
 	if (ans[arrive] == INF)
 		cout << "gg\n";
 	else
 	{
-		long long pre = ans[arrive];
-		for (int i = 0; i < N; i++)
+		vector<bool> check(N, false);
+		queue<int> q;
+		for (int i = 0; i < N - 1; i++)
 		{
 			for (int j = 0; j < N; j++)
 			{
@@ -57,13 +69,24 @@ int main()
 					continue;
 				for (pair<int, long long> t : v[j])
 					if (ans[t.first] > ans[j] + t.second + earn[t.first])
-						ans[t.first] = ans[j] + t.second + earn[t.first];
-				a_cost = min(a_cost, ans[arrive]);
+						q.push(t.first);
 			}
 		}
-		if (pre > ans[arrive])
+		while(!q.empty())
+		{
+			int next = q.front();
+			q.pop();
+			if (!check[next])
+			{
+				check[next] = true;
+				for (pair<int, long long> p : v[next])
+					if (!check[p.first])
+						q.push(p.first);
+			}
+		}
+		if (check[arrive])
 			cout << "Gee\n";
 		else
-			cout << -a_cost << "\n";
+			cout << -ans[arrive] << "\n";
 	}
 }
