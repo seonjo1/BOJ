@@ -6,7 +6,7 @@
 
 using namespace std;
 
-long long factorial[27];
+long long factorial[28];
 long long sum = 1;
 
 struct Tri
@@ -82,7 +82,7 @@ int main()
 	cout.tie(0);
 
 	factorial[0] = 1;
-	for (int i = 1; i < 27; i++)
+	for (int i = 1; i < 28; i++)
 		factorial[i] = (factorial[i - 1] * i) % 1000000007;
 	
 	int N;
