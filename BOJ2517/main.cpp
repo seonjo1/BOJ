@@ -1,31 +1,30 @@
 #include <iostream>
 #include <vector>
 #include <cmath>
+#include <algorithm>
 using namespace std;
 
-vector<int> tree;
-vector<int> v;
+vector<long long> tree;
+vector<pair<int ,int>> v;
 
-int makeTree(int node, int start, int end)
+int sum;
+
+bool compareT(pair<int, int> a, pair<int, int> b)
 {
-	if (start == end) return tree[node] = v[start];
-
-	int mid = (start + end) / 2;
-	int left = makeTree(node * 2, start, mid);
-	int right = makeTree(node * 2 + 1, mid + 1, end);
-	return (tree[node] = max(left, right));
+	return (a.first < b.first);
 }
 
-int findRank(int node, int start, int end, int i, int val)
+long long getMaxRank(int node, int start, int end, int idx)
 {
-	if (i < start || tree[node] <= val) return 0;
-	else if (start == end)
-	{
-		if (tree[node] > val) return 1;
-		else return 0;
-	}
+	if (idx < start || end < idx) return 0;
+	else if (start == end) return 1;
+	
 	int mid = (start + end) / 2;
-	return (findRank(node * 2, start, mid, i, val) + findRank(node * 2 + 1, mid + 1, end, i, val));
+	int left = getMaxRank(node * 2, start, mid, idx);
+	int right = getMaxRank(node * 2 + 1, mid + 1, end, idx);
+	++tree[node];
+	if (right) sum += (tree[node] - right);
+	return tree[node];
 }
 
 int main()
@@ -36,13 +35,24 @@ int main()
 
 	int N;
 	cin >> N;
-	v.resize(N + 1, 0);
+	v.resize(N);
 	tree.resize(1 << ((int)ceil(log2(N)) + 1));
 
 	for (int i = 0; i < N; i++)
-		cin >> v[i];
-	makeTree(1, 0, N - 1);
+	{
+		v[i] = make_pair(0, i);
+		cin >> v[i].first;
+	}
 
+	sort(v.begin(), v.end(), compareT);
+
+	long long ans[N];
 	for (int i = 0; i < N; i++)
-		cout << findRank(1, 0, N - 1, i, v[i]) + 1 << "\n";
+	{
+		sum = 0;
+		getMaxRank(1, 0, N - 1, v[i].second);
+		ans[v[i].second] = v[i].second + 1 - sum;
+	}
+	for (int i = 0; i < N; i++)
+		cout << ans[i] << "\n";
 }
